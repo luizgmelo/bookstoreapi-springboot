@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/books")
@@ -28,15 +27,10 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Book> getOneBook(@PathVariable(value = "id") Integer id) {
-        Optional<Book> bookOpt = bookService.getBookById(id);
-
-        if (bookOpt.isPresent()) {
-            Book book = bookOpt.get();
-            return ResponseEntity.status(HttpStatus.OK).body(book);
-        }
-
-        throw new BookNotFoundException();
+    public ResponseEntity<Book> getOneBook(@PathVariable Integer id) {
+       return bookService.getBookById(id)
+               .map(book -> ResponseEntity.status(HttpStatus.OK).body(book))
+               .orElseThrow(BookNotFoundException::new);
     }
 
     @PostMapping
@@ -45,26 +39,18 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Book> updateBook(@PathVariable(value = "id") Integer id, @RequestBody BookDto dto) {
-        Optional<Book> bookUpdatedOpt =  bookService.updateBook(id, dto);
-
-        if (bookUpdatedOpt.isPresent()) {
-            Book bookUpdated = bookUpdatedOpt.get();
-            return ResponseEntity.status(HttpStatus.OK).body(bookUpdated);
-        }
-
-        throw new BookNotFoundException();
+    public ResponseEntity<Book> updateBook(@PathVariable Integer id, @RequestBody BookDto dto) {
+        return bookService.updateBook(id, dto)
+                .map(book -> ResponseEntity.status(HttpStatus.OK).body(book))
+                .orElseThrow(BookNotFoundException::new);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable(value = "id") Integer id) {
-        Optional<Book> bookOpt = bookService.getBookById(id);
-
-        if (bookOpt.isPresent()) {
-            bookService.deleteBookById(id);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        }
-
-        throw new BookNotFoundException();
+    public ResponseEntity<Book> deleteBook(@PathVariable Integer id) {
+        return bookService.getBookById(id)
+                .map(book -> {
+                    bookService.deleteBookById(id);
+                    return ResponseEntity.status(HttpStatus.OK).body(book);
+                }).orElseThrow(BookNotFoundException::new);
     }
 }
