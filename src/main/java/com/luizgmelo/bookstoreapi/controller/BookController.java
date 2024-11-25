@@ -1,6 +1,7 @@
 package com.luizgmelo.bookstoreapi.controller;
 
 import com.luizgmelo.bookstoreapi.dto.BookDto;
+import com.luizgmelo.bookstoreapi.exceptions.BookNotFoundException;
 import com.luizgmelo.bookstoreapi.model.Book;
 import com.luizgmelo.bookstoreapi.service.BookService;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +36,7 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.OK).body(book);
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        throw new BookNotFoundException();
     }
 
     @PostMapping
@@ -52,13 +53,18 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.OK).body(bookUpdated);
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-
+        throw new BookNotFoundException();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable(value = "id") Integer id) {
-        bookService.deleteBookById(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        Optional<Book> bookOpt = bookService.getBookById(id);
+
+        if (bookOpt.isPresent()) {
+            bookService.deleteBookById(id);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
+        throw new BookNotFoundException();
     }
 }
