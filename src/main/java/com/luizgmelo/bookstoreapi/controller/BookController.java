@@ -2,8 +2,7 @@ package com.luizgmelo.bookstoreapi.controller;
 
 import com.luizgmelo.bookstoreapi.dto.BookDto;
 import com.luizgmelo.bookstoreapi.model.Book;
-import com.luizgmelo.bookstoreapi.repository.BookRepository;
-import org.springframework.beans.BeanUtils;
+import com.luizgmelo.bookstoreapi.service.BookService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,20 +14,20 @@ import java.util.Optional;
 @RequestMapping("/api/books")
 public class BookController {
 
-    private final BookRepository repository;
+    private final BookService bookService;
 
-    public BookController(BookRepository repository) {
-        this.repository = repository;
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
     }
 
     @GetMapping
     public ResponseEntity<List<Book>> getBooks() {
-        return ResponseEntity.status(HttpStatus.OK).body(repository.findAll());
+        return ResponseEntity.status(HttpStatus.OK).body(bookService.getBooks());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Book> getOneBook(@PathVariable(value = "id") Integer id) {
-        Optional<Book> bookOpt = repository.findById(id);
+        Optional<Book> bookOpt = bookService.getBookById(id);
 
         if (bookOpt.isPresent()) {
             Book book = bookOpt.get();
@@ -40,20 +39,16 @@ public class BookController {
 
     @PostMapping
     public ResponseEntity<Book> createBook(@RequestBody BookDto dto) {
-        Book book = new Book();
-        BeanUtils.copyProperties(dto, book);
-        repository.save(book);
-        return ResponseEntity.status(HttpStatus.CREATED).body(book);
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookService.createBook(dto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Book> updateBook(@PathVariable(value = "id") Integer id, @RequestBody BookDto dto) {
-        Optional<Book> bookOpt =  repository.findById(id);
-        if (bookOpt.isPresent()) {
-            Book book = bookOpt.get();
-            BeanUtils.copyProperties(dto, book);
-            repository.save(book);
-            return ResponseEntity.status(HttpStatus.OK).body(book);
+        Optional<Book> bookUpdatedOpt =  bookService.updateBook(id, dto);
+
+        if (bookUpdatedOpt.isPresent()) {
+            Book bookUpdated = bookUpdatedOpt.get();
+            return ResponseEntity.status(HttpStatus.OK).body(bookUpdated);
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -62,7 +57,7 @@ public class BookController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable(value = "id") Integer id) {
-        repository.deleteById(id);
+        bookService.deleteBookById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
