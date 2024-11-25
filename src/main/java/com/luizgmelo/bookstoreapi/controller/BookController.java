@@ -3,6 +3,7 @@ package com.luizgmelo.bookstoreapi.controller;
 import com.luizgmelo.bookstoreapi.dto.BookDto;
 import com.luizgmelo.bookstoreapi.model.Book;
 import com.luizgmelo.bookstoreapi.service.BookService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +22,8 @@ public class BookController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Book>> getBooks() {
-        return ResponseEntity.status(HttpStatus.OK).body(bookService.getBooks());
+    public ResponseEntity<List<Book>> getBooks(Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK).body(bookService.getBooks(pageable).getContent());
     }
 
     @GetMapping("/{id}")

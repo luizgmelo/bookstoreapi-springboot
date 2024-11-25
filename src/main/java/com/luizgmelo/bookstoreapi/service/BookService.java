@@ -4,9 +4,10 @@ import com.luizgmelo.bookstoreapi.dto.BookDto;
 import com.luizgmelo.bookstoreapi.model.Book;
 import com.luizgmelo.bookstoreapi.repository.BookRepository;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,8 +19,9 @@ public class BookService {
         this.repository = repository;
     }
 
-    public List<Book> getBooks() {
-        return repository.findAll();
+    public Page<Book> getBooks(Pageable pageable) {
+        return repository.findAll(pageable);
+
     }
 
     public Optional<Book> getBookById(Integer id) {
