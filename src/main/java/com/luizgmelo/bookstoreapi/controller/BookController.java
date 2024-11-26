@@ -1,7 +1,6 @@
 package com.luizgmelo.bookstoreapi.controller;
 
 import com.luizgmelo.bookstoreapi.dto.BookDto;
-import com.luizgmelo.bookstoreapi.exceptions.BookNotFoundException;
 import com.luizgmelo.bookstoreapi.model.Book;
 import com.luizgmelo.bookstoreapi.service.BookService;
 import org.springframework.data.domain.Pageable;
@@ -30,9 +29,7 @@ public class BookController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Book> getOneBook(@PathVariable Integer id) {
-       return bookService.getBookById(id)
-               .map(book -> ResponseEntity.status(HttpStatus.OK).body(book))
-               .orElseThrow(BookNotFoundException::new);
+       return ResponseEntity.status(HttpStatus.OK).body(bookService.getBookById(id));
     }
 
     @PostMapping
@@ -42,17 +39,12 @@ public class BookController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Book> updateBook(@PathVariable Integer id, @RequestBody BookDto dto) {
-        return bookService.updateBook(id, dto)
-                .map(book -> ResponseEntity.status(HttpStatus.OK).body(book))
-                .orElseThrow(BookNotFoundException::new);
+        return ResponseEntity.status(HttpStatus.OK).body(bookService.updateBook(id, dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Book> deleteBook(@PathVariable Integer id) {
-        return bookService.getBookById(id)
-                .map(book -> {
-                    bookService.deleteBookById(id);
-                    return ResponseEntity.status(HttpStatus.OK).body(book);
-                }).orElseThrow(BookNotFoundException::new);
+        return ResponseEntity.status(HttpStatus.OK).body(bookService.deleteBookById(id));
+
     }
 }

@@ -2,14 +2,13 @@ package com.luizgmelo.bookstoreapi.service;
 
 import com.luizgmelo.bookstoreapi.dto.BookDto;
 import com.luizgmelo.bookstoreapi.exceptions.BookAlreadyExistsException;
+import com.luizgmelo.bookstoreapi.exceptions.BookNotFoundException;
 import com.luizgmelo.bookstoreapi.model.Book;
 import com.luizgmelo.bookstoreapi.repository.BookRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class BookService {
@@ -32,15 +31,15 @@ public class BookService {
         }
     }
 
-    public Optional<Book> getBookById(Integer id) {
-        return repository.findById(id);
+    public Book getBookById(Integer id) {
+        return repository.findById(id).orElseThrow(BookNotFoundException::new);
     }
 
     public Book createBook(BookDto dto) {
         boolean exists = repository.existsByTitle(dto.title());
 
         if (exists) {
-            throw new BookAlreadyExistsException("A boot with title " + dto.title() + " already exists.");
+            throw new BookAlreadyExistsException(dto.title());
         }
 
         Book book = new Book();
@@ -48,19 +47,22 @@ public class BookService {
         return repository.save(book);
     }
 
-    public Optional<Book> updateBook(Integer id, BookDto dto) {
-        Optional<Book> bookOpt = repository.findById(id);
+    public Book updateBook(Integer id, BookDto dto) {
+        Book book = repository.findById(id).orElseThrow(BookNotFoundException::new);
 
-        if (bookOpt.isPresent()) {
-            Book book = bookOpt.get();
-            BeanUtils.copyProperties(dto, book);
-            return Optional.of(repository.save(book));
+        boolean exists = repository.existsByTitleAndBookIdNot(dto.title(), id);
+
+        if (exists) {
+            throw new BookAlreadyExistsException(dto.title());
         }
 
-        return Optional.empty();
+        BeanUtils.copyProperties(dto, book);
+        return repository.save(book);
     }
 
-    public void deleteBookById(Integer id) {
+    public Book deleteBookById(Integer id) {
+        Book removed = repository.findById(id).orElseThrow(BookNotFoundException::new);
         repository.deleteById(id);
+        return removed;
     }
 }

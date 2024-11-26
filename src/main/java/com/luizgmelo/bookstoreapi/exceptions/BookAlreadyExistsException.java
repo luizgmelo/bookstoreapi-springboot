@@ -6,7 +6,7 @@ public class BookAlreadyExistsException extends RuntimeException {
         super("This book already exists.");
     }
 
-    public BookAlreadyExistsException(String message) {
-        super(message);
+    public BookAlreadyExistsException(String title) {
+        super("A boot with title " + title + " already exists.");
     }
 }

@@ -1,6 +1,7 @@
 package com.luizgmelo.bookstoreapi.service;
 
 import com.luizgmelo.bookstoreapi.exceptions.BookAlreadyExistsException;
+import com.luizgmelo.bookstoreapi.exceptions.BookNotFoundException;
 import com.luizgmelo.bookstoreapi.model.Book;
 import com.luizgmelo.bookstoreapi.repository.BookRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +20,6 @@ import java.util.List;
 
 import static com.luizgmelo.bookstoreapi.constants.Constants.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -84,10 +84,9 @@ class BookServiceTest {
     void getBookByIdCase1() {
         when(repository.findById(any())).thenReturn(Optional.of(BOOK_0));
 
-        Optional<Book> sut = bookService.getBookById(1);
+        Book sut = bookService.getBookById(1);
 
-        assertThat(sut).isNotEmpty();
-        assertEquals(BOOK_0, sut.get());
+        assertThat(sut).isEqualTo(BOOK_0);
     }
 
     @Test
@@ -95,9 +94,9 @@ class BookServiceTest {
     void getBookByIdCase2() {
         when(repository.findById(any())).thenReturn(Optional.empty());
 
-        Optional<Book> sut = bookService.getBookById(9999);
+        BookNotFoundException exception = assertThrows(BookNotFoundException.class, () -> bookService.getBookById(9999));
 
-        assertThat(sut).isEmpty();
+        assertThat(exception.getMessage()).isEqualTo("Book not found.");
     }
 
     @Test
@@ -135,19 +134,22 @@ class BookServiceTest {
         when(repository.findById(any())).thenReturn(Optional.of(BOOK_0));
         when(repository.save(any(Book.class))).thenReturn(BOOK_0);
 
-        Optional<Book> sut = bookService.updateBook(1, BOOK_0_DTO);
+        Book sut = bookService.updateBook(1, BOOK_0_DTO);
 
-        assertThat(sut).isNotEmpty();
-        assertThat(sut.get()).isEqualTo(BOOK_0);
+        assertThat(sut).isNotNull();
+        assertThat(sut).isEqualTo(BOOK_0);
     }
 
     @Test
     @DisplayName("Should delete a book if exists in database")
     public void deleteBookById() {
         int id = 1;
+        when(repository.findById(any())).thenReturn(Optional.of(BOOK_0));
         doNothing().when(repository).deleteById(any());
 
-        bookService.deleteBookById(id);
+        Book removed = bookService.deleteBookById(id);
+
+        assertThat(removed).isEqualTo(BOOK_0);
 
         verify(repository, times(id)).deleteById(id);
     }
