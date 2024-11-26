@@ -1,5 +1,6 @@
 package com.luizgmelo.bookstoreapi.service;
 
+import com.luizgmelo.bookstoreapi.exceptions.BookAlreadyExistsException;
 import com.luizgmelo.bookstoreapi.model.Book;
 import com.luizgmelo.bookstoreapi.repository.BookRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +20,7 @@ import java.util.List;
 import static com.luizgmelo.bookstoreapi.constants.Constants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -107,6 +109,24 @@ class BookServiceTest {
 
         assertThat(sut).isEqualTo(BOOK_0);
         verify(repository, times(1)).save(any(Book.class));
+    }
+
+    @Test
+    @DisplayName("Should thorw exception when create a Book already exists in database")
+    void createBookCase2() {
+
+        when(repository.existsByTitle(BOOK_0_DTO.title())).thenReturn(true);
+
+        BookAlreadyExistsException exception = assertThrows(
+                BookAlreadyExistsException.class,
+                () -> bookService.createBook(BOOK_0_DTO)
+        );
+
+        assertThat(exception.getMessage())
+                .isEqualTo("A boot with title " + BOOK_0_DTO.title() + " already exists.");
+
+        verify(repository, times(1)).existsByTitle(BOOK_0_DTO.title());
+        verifyNoMoreInteractions(repository);
     }
 
     @Test

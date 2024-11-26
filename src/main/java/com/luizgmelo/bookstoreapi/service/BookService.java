@@ -1,6 +1,7 @@
 package com.luizgmelo.bookstoreapi.service;
 
 import com.luizgmelo.bookstoreapi.dto.BookDto;
+import com.luizgmelo.bookstoreapi.exceptions.BookAlreadyExistsException;
 import com.luizgmelo.bookstoreapi.model.Book;
 import com.luizgmelo.bookstoreapi.repository.BookRepository;
 import org.springframework.beans.BeanUtils;
@@ -36,6 +37,12 @@ public class BookService {
     }
 
     public Book createBook(BookDto dto) {
+        boolean exists = repository.existsByTitle(dto.title());
+
+        if (exists) {
+            throw new BookAlreadyExistsException("A boot with title " + dto.title() + " already exists.");
+        }
+
         Book book = new Book();
         BeanUtils.copyProperties(dto, book);
         return repository.save(book);
