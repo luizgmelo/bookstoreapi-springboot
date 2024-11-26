@@ -130,7 +130,7 @@ class BookServiceTest {
 
     @Test
     @DisplayName("Should update a book in database")
-    void updateBook() {
+    void updateBookCase1() {
         when(repository.findById(any())).thenReturn(Optional.of(BOOK_0));
         when(repository.save(any(Book.class))).thenReturn(BOOK_0);
 
@@ -141,8 +141,19 @@ class BookServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw exception if update a book for a title that already exists in database")
+    void updateBookCase2() {
+        when(repository.findById(any())).thenReturn(Optional.of(BOOK_1));
+        when(repository.existsByTitleAndBookIdNot(any(), any())).thenReturn(true);
+
+        BookAlreadyExistsException exception = assertThrows(BookAlreadyExistsException.class, () -> bookService.updateBook(2, BOOK_0_DTO));
+
+        assertThat(exception.getMessage()).isEqualTo("A boot with title " + BOOK_0_DTO.title() + " already exists.");
+    }
+
+    @Test
     @DisplayName("Should delete a book if exists in database")
-    public void deleteBookById() {
+    public void deleteBookByIdCase1() {
         int id = 1;
         when(repository.findById(any())).thenReturn(Optional.of(BOOK_0));
         doNothing().when(repository).deleteById(any());
@@ -152,5 +163,14 @@ class BookServiceTest {
         assertThat(removed).isEqualTo(BOOK_0);
 
         verify(repository, times(id)).deleteById(id);
+    }
+
+    @Test
+    @DisplayName("Should throws not found exception if delete a book that not exists in database")
+    public void deleteBookByIdCase2() {
+        int id = 1;
+        when(repository.findById(any())).thenReturn(Optional.empty());
+        BookNotFoundException exception = assertThrows(BookNotFoundException.class,() -> bookService.deleteBookById(id));
+        assertThat(exception.getMessage()).isEqualTo("Book not found.");
     }
 }
