@@ -22,8 +22,10 @@ public class BookController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Book>> getBooks(Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(bookService.getBooks(pageable).getContent());
+    public ResponseEntity<List<Book>> getBooks(Pageable pageable,
+                                               @RequestParam(required = false) String title,
+                                               @RequestParam(required = false) String author) {
+        return ResponseEntity.status(HttpStatus.OK).body(bookService.getBooks(pageable, title, author).getContent());
     }
 
     @GetMapping("/{id}")

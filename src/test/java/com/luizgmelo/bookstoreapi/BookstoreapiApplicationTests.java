@@ -25,7 +25,7 @@ class BookstoreapiApplicationTests {
 	void testGetBooksPagination() {
 		Pageable pageable = PageRequest.of(0, 2);
 
-		Page<Book> booksPage = bookService.getBooks(pageable);
+		Page<Book> booksPage = bookService.getBooks(pageable, null, null);
 
 		assertThat(booksPage.getContent()).hasSize(2);
 		assertThat(BOOK_0.getTitle()).isEqualTo(booksPage.getContent().get(0).getTitle());

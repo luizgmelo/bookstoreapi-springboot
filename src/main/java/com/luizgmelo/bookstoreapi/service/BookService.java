@@ -19,9 +19,16 @@ public class BookService {
         this.repository = repository;
     }
 
-    public Page<Book> getBooks(Pageable pageable) {
-        return repository.findAll(pageable);
-
+    public Page<Book> getBooks(Pageable pageable, String title, String author) {
+        if (title != null && author != null) {
+            return repository.findBookByTitleContainingIgnoreCaseAndAuthorContainingIgnoreCase(title, author, pageable);
+        } else if (title != null) {
+            return repository.findBookByTitleContainingIgnoreCase(title, pageable);
+        } else if (author != null) {
+            return repository.findBookByAuthorContainingIgnoreCase(author, pageable);
+        } else {
+            return repository.findAll(pageable);
+        }
     }
 
     public Optional<Book> getBookById(Integer id) {
