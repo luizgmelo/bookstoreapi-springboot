@@ -35,5 +35,6 @@ public class Book extends RepresentationModel<Book> {
     private List<Comment> comments;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Rating> ratings;
 }
