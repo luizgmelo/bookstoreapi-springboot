@@ -65,6 +65,11 @@ public class CommentController {
         }
 
         bookService.getBookById(bookId);
+        Comment comment = commentService.getCommentById(commentId);
+
+        if (!authenticatedUser.getUsername().equals(comment.getAuthor().getUsernameField())) {
+            throw new RuntimeException("Unauthorized process");
+        }
 
         commentService.deleteComment(commentId);
 
